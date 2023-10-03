@@ -1,84 +1,95 @@
-#include <sys/ioctl.h>
 #include <iostream>
-#include <vector>
 #include <math.h>
+#include <sstream>
+#include <string>
+#include <sys/ioctl.h>
 #include <unistd.h>
+#include <vector>
+
+#include <ncurses.h>
 
 #include "board.h"
 
 int main()
 {
-  struct winsize w;
-  ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 
   const clock_t start = clock();
   srand(static_cast<unsigned int>(start));
+  const std::stringstream stream;
 
-  auto board = Board(w.ws_row, w.ws_col);
+  struct winsize w;
+  ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 
-  board.InitShape(15, 40, {
-    {0,1,0},
-    {0,0,1},
-    {1,1,1},
-  });
+  const int width = w.ws_col;
+  const int height = w.ws_row;
 
-  board.InitShape(12, 20, {
-    {0,1,0},
-    {1,0,0},
-    {1,1,1},
-  });
+  auto board = Board(height, width);
 
-  board.InitShape(8, 0.75 * w.ws_col, {
-    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,1,1,1,0,0,0,1,1,1,0,0,0},
-    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-    {0,1,0,0,0,0,1,0,1,0,0,0,0,1,0},
-    {0,1,0,0,0,0,1,0,1,0,0,0,0,1,0},
-    {0,1,0,0,0,0,1,0,1,0,0,0,0,1,0},
-    {0,0,0,1,1,1,0,0,0,1,1,1,0,0,0},
-    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,1,1,1,0,0,0,1,1,1,0,0,0},
-    {0,1,0,0,0,0,1,0,1,0,0,0,0,1,0},
-    {0,1,0,0,0,0,1,0,1,0,0,0,0,1,0},
-    {0,1,0,0,0,0,1,0,1,0,0,0,0,1,0},
-    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-    {0,0,0,1,1,1,0,0,0,1,1,1,0,0,0},
-    {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-  });
+  for(int i=0; i<20; i++) {
+    int x = static_cast<float>(rand())/static_cast<float>(RAND_MAX) * (width - 5);
+    int y = static_cast<float>(rand())/static_cast<float>(RAND_MAX) * (height - 5);
 
-  board.InitShape(10, 4, {
-    {0,1,0},
-    {1,0,1},
-    {0,1,0},
-  });
+    board.InitShape(y, x, {
+      {0,1,0},
+      {0,0,1},
+      {1,1,1},
+    });
 
-  board.InitShape(15, 12, {
-    {0,1,0},
-    {1,0,1},
-    {0,1,0},
-  });
+    x = static_cast<float>(rand())/static_cast<float>(RAND_MAX) * (width - 5);
+    y = static_cast<float>(rand())/static_cast<float>(RAND_MAX) * (height - 5);
 
+    board.InitShape(y, x, {
+      {0,1,0},
+      {1,0,0},
+      {1,1,1},
+    });
+}
 
+  // board.InitShape(8, 0.75 * width, {
+  //   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  //   {0,0,0,1,1,1,0,0,0,1,1,1,0,0,0},
+  //   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  //   {0,1,0,0,0,0,1,0,1,0,0,0,0,1,0},
+  //   {0,1,0,0,0,0,1,0,1,0,0,0,0,1,0},
+  //   {0,1,0,0,0,0,1,0,1,0,0,0,0,1,0},
+  //   {0,0,0,1,1,1,0,0,0,1,1,1,0,0,0},
+  //   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  //   {0,0,0,1,1,1,0,0,0,1,1,1,0,0,0},
+  //   {0,1,0,0,0,0,1,0,1,0,0,0,0,1,0},
+  //   {0,1,0,0,0,0,1,0,1,0,0,0,0,1,0},
+  //   {0,1,0,0,0,0,1,0,1,0,0,0,0,1,0},
+  //   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  //   {0,0,0,1,1,1,0,0,0,1,1,1,0,0,0},
+  //   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+  // });
 
+  initscr();
+  WINDOW* window = newwin(height, width, 0, 0);
+  cbreak();
+  nodelay(window, TRUE);
+  raw();
+  noecho();
+  refresh();
 
-  // board.set(15, 16);
-  // board.set(15, 17);
-  // board.set(16, 15);
-  // board.set(16, 16);
-  // board.set(17, 16);
+  int c = ' ';
+  while('q' != static_cast<char>(c)) {
 
-  // board.set(35, 16);
-  // board.set(35, 17);
-  // board.set(36, 15);
-  // board.set(36, 16);
-  // board.set(37, 16);
-
-
-  board.Log();
-
-  while(1) {
     board.Update();
-    board.Log();
+    board.VisitElements([&](Cell& cell, int row, int column) -> void {
+      cell.update();
+      if(cell.isAlive()) {
+        mvwprintw(window, row, column, "#");
+      } else {
+        mvwprintw(window, row, column, " ");
+      }
+    });
+    wrefresh(window);
     usleep(50000);
+    clear();
+    wrefresh(window);
+
+    c = wgetch(window);
   }
+
+  endwin();
 }

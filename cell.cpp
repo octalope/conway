@@ -1,25 +1,25 @@
 #include "cell.h"
 
 Cell::Cell(bool alive/*=false*/) {
-  this->next = alive;
-  this->alive = alive;
+  this->_next = alive;
+  this->_alive = alive;
 }
 
 Cell& Cell::birth() {
-  this->next = true;
+  this->_next = true;
   return *this;
 }
 
 Cell& Cell::expire() {
-  this->next = false;
+  this->_next = false;
   return *this;
 }
 
 bool Cell::isAlive() {
-  return this->alive;
+  return this->_alive;
 }
 
 Cell& Cell::update() {
-  this->alive = this->next;
+  this->_alive = this->_next;
   return *this;
 }

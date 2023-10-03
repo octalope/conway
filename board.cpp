@@ -1,4 +1,11 @@
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <format>
+
 #include "board.h"
+
+using namespace std;
 
 Board::Board(int rows, int cols) {
   for(int j=0; j<rows; j++) {
@@ -7,45 +14,35 @@ Board::Board(int rows, int cols) {
       row.push_back(Cell());
       // row.push_back(Cell((static_cast<float>(rand())/static_cast<float>(RAND_MAX) > 0.90)));
     }
-    board.push_back(row);
+    _board.push_back(row);
   }
 }
 
 void Board::set(int row, int col) {
-  this->board[row][col].birth().update();
+  this->_board[row][col].birth().update();
 }
 
 int Board::height() const {
-  return this->board.size();
+  return this->_board.size();
 }
 
 int Board::width() const {
-  return this->board[0].size();
+  return this->_board[0].size();
 }
 
-void Board::Log() {
-  for(int i=0; i<this->width(); i++) {
-    std::cout << "=";
-  }
-  std::cout << std::endl;
-
+void Board::Log(std::stringstream& ss) {
   VisitElements([&](Cell& cell, int row, int column) -> void {
     cell.update();
-    std::cout << (cell.isAlive() ? "*" : " ");
+    ss << (cell.isAlive() ? "*" : " ");
     if(column == width()-1) {
-      std::cout << std::endl;
+      ss << std::endl;
     }
   });
-  std::cout << std::endl;
-
-  for(int i=0; i<this->width(); i++) {
-    std::cout << "=";
-  }
-  std::cout << std::endl;
+  ss << std::endl;
 }
 
-std::vector<Point> Board::NeighborPoints(int row, int column) const {
-  std::vector<Point> result;
+Points Board::NeighborPoints(int row, int column) const {
+  Points result;
 
   for(int j=-1; j<=1; j++) {
     for(int i=-1; i<=1; i++) {
@@ -65,11 +62,11 @@ std::vector<Point> Board::NeighborPoints(int row, int column) const {
   return result;
 }
 
-void Board::InitShape(int row, int col, std::vector<std::vector<int>> shape) {
+void Board::InitShape(int row, int col, ArrayD2<int> shape) {
   for(size_t j=0; j<shape.size(); j++) {
     for(size_t i=0; i<shape[0].size(); i++) {
       if (shape[j][i]) {
-        this->board[j+row][i+col].birth().update();
+        this->_board[j+row][i+col].birth().update();
       }
     }
   }
@@ -89,7 +86,7 @@ int Board::LivingNeighbors(int row, int column) {
       if (c >= this->width()) c = 0;
 
       if (r != row || c != column) {
-        if (this->board[r][c].isAlive()) {
+        if (this->_board[r][c].isAlive()) {
           aliveCount++;
         }
       }
@@ -100,9 +97,9 @@ int Board::LivingNeighbors(int row, int column) {
 
 void Board::VisitElements (const std::function <void (Cell&, int, int)>& f)
 {
-  for(unsigned int j=0; j<board.size(); j++) {
-    for(unsigned int i=0; i<board[j].size(); i++) {
-      f(board[j][i], j, i);
+  for(unsigned int j=0; j<_board.size(); j++) {
+    for(unsigned int i=0; i<_board[j].size(); i++) {
+      f(_board[j][i], j, i);
     }
   }
 }
@@ -110,7 +107,6 @@ void Board::VisitElements (const std::function <void (Cell&, int, int)>& f)
 void Board::Update() {
   VisitElements([&](Cell& cell, int row, int column) -> void {
     int count = LivingNeighbors(row, column);
-    // std::cout << (cell.isAlive() ? "!" : " ") << " (" << row << " " << column << ") " << count << " ";
 
     if (cell.isAlive() && (count < 2 || count > 3)) {
       cell.expire();

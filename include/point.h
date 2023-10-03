@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <format>
 
 class Point {
 private:
@@ -9,7 +8,8 @@ private:
   int _column;
 public:
   Point(int r, int c);
-  int row();
-  int column();
-  std::string toString();
+  int row() const;
+  int column() const;
+  std::string toString() const;
 };
+
